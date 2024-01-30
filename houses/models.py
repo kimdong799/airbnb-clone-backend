@@ -8,7 +8,13 @@ class House(models.Model):
     '''
     House Model Definition for Houses
     '''
-    name = models.CharField(max_length=140)     # name 필드, 문자열, 최대140자 제한
-    price = models.PositiveIntegerField()       # price 필드, 양수
-    description = models.TextField()            # description 필드, 문자열
-    address = models.CharField(max_length=140)  # address 필드, 문자열, 최대 140자 제한 
+    name = models.CharField(max_length=140)                 # name 필드, 문자열, 최대140자 제한
+    price_per_night = models.PositiveIntegerField()         # price 필드, 양수
+    description = models.TextField()                        # description 필드, 문자열
+    address = models.CharField(max_length=140)              # address 필드, 문자열, 최대 140자 제한
+    pets_allowed = models.BooleanField(default=True)        # pets_allowed, Boolean, 기본값 True
+
+    def __str__(self):
+        return self.name
+    
+    
