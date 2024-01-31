@@ -20,15 +20,3 @@ class HouseAdmin(admin.ModelAdmin):
         "price_per_night",
         "pets_allowed",
     )
-
-    # 검색바 추가
-    search_fields = ("address",)  # element가 하나인 경우 , 가 반드시 필요함 (튜플)
-
-    # list display link
-    list_display_links = (
-        "name",
-        "address",
-    )
-
-    # list editable
-    list_editable = ("pets_allowed",)
