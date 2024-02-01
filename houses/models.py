@@ -22,5 +22,8 @@ class House(models.Model):
         help_text="Does this house allow pets?",
     )  # pets_allowed, Boolean, 기본값 True
 
+    # owner 필드를 user앱의 User 모델과 CASCADE Relationship 지정
+    owner = models.ForeignKey("users.User", on_delete=models.CASCADE)
+
     def __str__(self):
         return self.name
