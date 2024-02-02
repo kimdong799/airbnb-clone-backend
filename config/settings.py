@@ -29,7 +29,7 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-CUSTOM_APPS = ["houses.apps.HousesConfig", "users.apps.UsersConfig"]
+CUSTOM_APPS = ["users.apps.UsersConfig"]
 
 SYSTEM_APPS = [
     "django.contrib.admin",
@@ -126,4 +126,5 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Auth
+# django user 모델 커스텀 시 명시
 AUTH_USER_MODEL = "users.User"
