@@ -6,11 +6,18 @@ from common.models import CommonModel  # 공통 Model 로직
 class Room(CommonModel):
     """Room Model Definition"""
 
+    def __str__(self):
+        return self.name
+
     class RoomKindChoices(models.TextChoices):
         ENTIRE_PLACE = ("entire_place", "Entire Place")
         PRIVATE_ROOM = ("private_room", "Private Room")
         SHARED_ROOM = ("shared_room", "Shared Room")
 
+    name = models.CharField(
+        max_length=180,
+        default="",
+    )
     country = models.CharField(
         max_length=50,
         default="한국",
@@ -47,10 +54,20 @@ class Room(CommonModel):
 class Amenity(CommonModel):
     """Amenity Definitnion"""
 
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        # admin 패널에 표시되는 Amenitys 오타 수정 (직접 지정)
+        verbose_name_plural = "Amenities"
+
     name = models.CharField(
         max_length=150,
     )
     description = models.CharField(
         max_length=50,
+        # django db에서 null가능
         null=True,
+        # form에서 빈 값 가능
+        blank=True,
     )
