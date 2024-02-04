@@ -65,7 +65,7 @@ class Amenity(CommonModel):
         max_length=150,
     )
     description = models.CharField(
-        max_length=50,
+        max_length=150,
         # django db에서 null가능
         null=True,
         # form에서 빈 값 가능
