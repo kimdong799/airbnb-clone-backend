@@ -33,6 +33,12 @@ class Experience(CommonModel):
     perks = models.ManyToManyField(
         "experiences.Perk",
     )
+    category = models.ForeignKey(
+        "categories.Category",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
 
 class Perk(CommonModel):
