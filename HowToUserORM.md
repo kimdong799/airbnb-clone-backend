@@ -1,7 +1,7 @@
 # ORM
 
 ---
-
+test commit
 django는 자동으로 데이터베이스 추상화 API를 제공함
 
 python code를 이용해 db 조작 가능
