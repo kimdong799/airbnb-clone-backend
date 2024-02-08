@@ -57,3 +57,6 @@ class User(AbstractUser):
         max_length=5,
         choices=CurrencyChoices.choices,
     )
+
+    def hosting_rooms(self):
+        return self.room_set.count()
