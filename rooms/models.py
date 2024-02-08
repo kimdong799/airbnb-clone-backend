@@ -6,9 +6,6 @@ from common.models import CommonModel  # 공통 Model 로직
 class Room(CommonModel):
     """Room Model Definition"""
 
-    def __str__(self):
-        return self.name
-
     class RoomKindChoices(models.TextChoices):
         ENTIRE_PLACE = ("entire_place", "Entire Place")
         PRIVATE_ROOM = ("private_room", "Private Room")
@@ -55,6 +52,13 @@ class Room(CommonModel):
         null=True,
         blank=True,
     )
+
+    def __str__(self):
+        return self.name
+
+    def total_amenities(self):
+        print(self)
+        return self.amenities.count()
 
 
 class Amenity(CommonModel):
