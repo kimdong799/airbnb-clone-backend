@@ -24,6 +24,15 @@ class RoomAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
+    # default = __contains
+    search_fields = (
+        # ^ => startswith
+        # = => equal
+        "name",
+        "^price",
+        # FK 검색
+        "owner__username",
+    )
     # 수정 페이지에서 보고 싶은 경우 사용
     readonly_fields = (
         "created_at",
