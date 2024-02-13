@@ -59,4 +59,4 @@ class User(AbstractUser):
     )
 
     def hosting_rooms(self):
-        return self.room_set.count()
+        return self.rooms.count()
