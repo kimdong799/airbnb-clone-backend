@@ -71,6 +71,7 @@ class Room(CommonModel):
         if count == 0:
             return "No Reviews"
         else:
+            # values로 접근해야 모든 속성에 접근하지 않아 최적화 가능
             return round(
                 sum(
                     [review["rating"] for review in self.reviews.all().values("rating")]

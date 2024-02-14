@@ -8,4 +8,7 @@ class ReviewAdmin(admin.ModelAdmin):
         "__str__",
         "payload",
     )
-    list_filter = ("rating",)
+    list_filter = (
+        "rating",
+        "user__is_host",
+    )
