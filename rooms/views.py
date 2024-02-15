@@ -19,7 +19,23 @@ def see_all_rooms(request):
 
 
 def see_one_room(request, room_id):
-    return HttpResponse(Room.objects.get(pk=room_id))
+    try:
+        room = Room.objects.get(pk=room_id)
+        return render(
+            request,
+            "room_detail.html",
+            {
+                "room": room,
+            },
+        )
+    except Room.DoesNotExist:
+        return render(
+            request,
+            "room_detail.html",
+            {
+                "not_found": True,
+            },
+        )
 
 
 def see_one_room_with_name(request, room_id, room_name):
