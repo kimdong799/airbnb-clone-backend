@@ -18,11 +18,9 @@ def categories(request):
         # User Input 검증
         print(serializer.is_valid())
         if serializer.is_valid():
-            return Response(
-                {
-                    "created": True,
-                }
-            )
+            # save() 호출 시 serializer의 create()가 호출된
+            new_category = serializer.save()
+            return Response(CategorySerializer(new_category).data)
         else:
             return serializer.errors
 
