@@ -13,12 +13,18 @@ def categories(request):
         serializer = CategorySerializer(all_categories, many=True)
         return Response(serializer.data)
     elif request.method == "POST":
-        print(request.data)
-        return Response(
-            {
-                "created": True,
-            }
-        )
+        # POST 데이터를 시리얼라이저에 전달
+        serializer = CategorySerializer(data=request.data)
+        # User Input 검증
+        print(serializer.is_valid())
+        if serializer.is_valid():
+            return Response(
+                {
+                    "created": True,
+                }
+            )
+        else:
+            return serializer.errors
 
 
 @api_view()
