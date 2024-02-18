@@ -22,3 +22,9 @@ class CategorySerializer(serializers.Serializer):
         # ** 는 input dict를 create 가능한 형태로 자동으로 변환해줌
         # name = validated_data.name ...
         return Category.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get("name")
+        instance.kind = validated_data.get("kind", instance.kind)
+        instance.save()
+        return instance

@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from rest_framework.exceptions import NotFound  # 404 Error
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Category
@@ -22,11 +23,33 @@ def categories(request):
             new_category = serializer.save()
             return Response(CategorySerializer(new_category).data)
         else:
-            return serializer.errors
+            return Response(serializer.errors)
 
 
-@api_view()
+@api_view(["GET", "PUT"])
 def category(request, pk):
-    category = Category.objects.get(pk=pk)
-    serializer = CategorySerializer(category, many=False)
-    return Response(serializer.data)
+    try:
+        category = Category.objects.get(pk=pk)
+    except Category.DoesNotExist:
+        raise NotFound
+
+    if request.method == "GET":
+        serializer = CategorySerializer(
+            category,
+            many=False,
+        )
+        return Response(serializer.data)
+
+    elif request.method == "PUT":
+        serializer = CategorySerializer(
+            category,
+            data=request.data,
+            # 일부 데이터만 변경 가능
+            partial=True,
+            many=False,
+        )
+        if serializer.is_valid():
+            updated_category = serializer.save()
+            return Response(CategorySerializer(updated_category).data)
+        else:
+            return Response(serializer.errors)
