@@ -35,7 +35,7 @@ class User(AbstractUser):
         editable=False,
     )
     avatar = models.ImageField(
-        # 필수 항목 해제
+        upload_to="avatars/",
         blank=True,
     )
     name = models.CharField(
