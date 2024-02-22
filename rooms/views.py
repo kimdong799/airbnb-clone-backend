@@ -58,13 +58,12 @@ class AmenityDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-def see_all_rooms(request):
-    rooms = Room.objects.all()
-    return render(
-        request,
-        "all_rooms.html",
-        {
-            "rooms": rooms,
-            "title": "Hello! this title comes from django",
-        },
-    )
+# Serializer Relationship
+class Rooms(APIView):
+    def get(self, request):
+        all_rooms = Room.objects.all()
+        serialzer = RoomSerializer(
+            all_rooms,
+            many=True,
+        )
+        return Response(serialzer.data)

@@ -7,6 +7,9 @@ class RoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
         fields = "__all__"
+        # Serilizer Relationship 추가 (가장 쉬운 방법)
+        # 커스터마이징 불가 단점
+        depth = 1
 
 
 class AmenitySerializer(serializers.ModelSerializer):
