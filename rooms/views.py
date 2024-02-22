@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, NotAuthenticated
 from rest_framework import status
 from .models import Room, Amenity
 from .serializers import RoomDetailSerializer, RoomListSerializer, AmenitySerializer
@@ -80,3 +80,18 @@ class RoomDetail(APIView):
     def get(self, request, pk):
         serializer = RoomDetailSerializer(self.get_object(pk))
         return Response(serializer.data)
+
+    def post(self, request, pk):
+        # user 인증
+        if request.user.is_authenticated:
+            serializer = RoomDetailSerializer(data=request.data)
+            if serializer.is_valid():
+                # owner는 request를 보낸 user로 지정
+                # create 메소드의 validated_data에 추가
+                room = serializer.save(owner=request.user)
+                serializer = RoomDetailSerializer(room)
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors)
+        else:
+            raise NotAuthenticated

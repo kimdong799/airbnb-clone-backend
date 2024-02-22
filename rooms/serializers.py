@@ -17,8 +17,13 @@ class AmenitySerializer(serializers.ModelSerializer):
 class RoomDetailSerializer(serializers.ModelSerializer):
     # Serializer 관계 지정 필트 커스터마이징
     owner = TinyUserSerializer()
-    amenities = AmenitySerializer(many=True)
-    category = CategorySerializer()
+    amenities = AmenitySerializer(
+        read_only=True,
+        many=True,
+    )
+    category = CategorySerializer(
+        read_only=True,
+    )
 
     class Meta:
         model = Room
