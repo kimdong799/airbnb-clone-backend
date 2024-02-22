@@ -2,9 +2,10 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, NotAuthenticated
+from rest_framework.exceptions import NotFound, NotAuthenticated, ParseError
 from rest_framework import status
 from .models import Room, Amenity
+from categories.models import Category
 from .serializers import RoomDetailSerializer, RoomListSerializer, AmenitySerializer
 
 # Create your views here.
@@ -86,9 +87,23 @@ class RoomDetail(APIView):
         if request.user.is_authenticated:
             serializer = RoomDetailSerializer(data=request.data)
             if serializer.is_valid():
+                # user request의 category 전달
+                category_pk = request.data.get("category")
+                if not category_pk:
+                    raise ParseError
+                try:
+                    category = Category.objects.get(pk=category_pk)
+                    if category.kind == Category.CategoryKindChoices.EXPERIENCES:
+                        raise ParseError
+                except Category.DoesNotExist:
+                    raise ParseError
+
                 # owner는 request를 보낸 user로 지정
                 # create 메소드의 validated_data에 추가
-                room = serializer.save(owner=request.user)
+                room = serializer.save(
+                    owner=request.user,
+                    category=category,
+                )
                 serializer = RoomDetailSerializer(room)
                 return Response(serializer.data)
             else:
