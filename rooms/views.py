@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework import status
 from .models import Room, Amenity
-from .serializers import RoomSerializer, AmenitySerializer
+from .serializers import RoomDetailSerializer, RoomListSerializer, AmenitySerializer
 
 # Create your views here.
 # view : 유저가 특정 url에 접근했을 때 작동하는 함수
@@ -62,8 +62,21 @@ class AmenityDetail(APIView):
 class Rooms(APIView):
     def get(self, request):
         all_rooms = Room.objects.all()
-        serialzer = RoomSerializer(
+        serialzer = RoomListSerializer(
             all_rooms,
             many=True,
         )
         return Response(serialzer.data)
+
+
+class RoomDetail(APIView):
+    def get_object(self, pk):
+        try:
+            room = Room.objects.get(pk=pk)
+        except Room.DoesNotExist:
+            raise NotFound
+        return room
+
+    def get(self, request, pk):
+        serializer = RoomDetailSerializer(self.get_object(pk))
+        return Response(serializer.data)

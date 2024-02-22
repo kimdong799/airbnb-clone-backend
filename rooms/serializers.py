@@ -1,18 +1,37 @@
 from rest_framework import serializers
 from .models import Room, Amenity
+from users.serializers import TinyUserSerializer
+from categories.serializers import CategorySerializer
 
 
 # ModelSerializer를 사용하면 id, created_at, updated_at 필드는 자동으로 read_only로 지정됨
-class RoomSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Room
-        fields = "__all__"
-        # Serilizer Relationship 추가 (가장 쉬운 방법)
-        # 커스터마이징 불가 단점
-        depth = 1
-
-
 class AmenitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Amenity
+        fields = (
+            "name",
+            "description",
+        )
+
+
+class RoomDetailSerializer(serializers.ModelSerializer):
+    # Serializer 관계 지정 필트 커스터마이징
+    owner = TinyUserSerializer()
+    amenities = AmenitySerializer(many=True)
+    category = CategorySerializer()
+
+    class Meta:
+        model = Room
         fields = "__all__"
+
+
+class RoomListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Room
+        fields = (
+            "pk",
+            "name",
+            "country",
+            "city",
+            "price",
+        )

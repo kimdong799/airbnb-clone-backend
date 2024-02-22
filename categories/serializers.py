@@ -35,6 +35,9 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         # Option 1 : expose fields 정의
-        fields = "__all__"
+        fields = (
+            "name",
+            "kind",
+        )
         # Option 2 : exclude fields 정의
         # exclude = ("created_at",)
