@@ -1,7 +1,12 @@
 from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, NotAuthenticated, ParseError
+from rest_framework.exceptions import (
+    NotFound,
+    NotAuthenticated,
+    ParseError,
+    PermissionDenied,
+)
 from rest_framework import status
 from .models import Room, Amenity
 from categories.models import Category
@@ -114,8 +119,66 @@ class RoomDetail(APIView):
                         serializer = RoomDetailSerializer(room)
                         return Response(serializer.data)
                 except Exception:
-                    return ParseError("Amenity not found")
+                    raise ParseError("Amenity not found")
             else:
                 return Response(serializer.errors)
         else:
             raise NotAuthenticated
+
+    def put(self, request, pk):
+        room = self.get_object(pk)
+        # room의 주인이 아니라면 방을 수정할 수 없도록 코딩
+        # 로그인되어있는지 확인
+        # 두 로직 모두 동작하도록 설계
+        if not request.user.is_authenticated:
+            raise NotAuthenticated
+        if room.owner != request.user:
+            raise PermissionDenied
+        serializer = RoomDetailSerializer(
+            self.get_object(pk),
+            data=request.data,
+            partial=True,
+        )
+        if serializer.is_valid():
+            category_pk = request.data.get("category")
+            # category 입력값이 존재하는 경우 validation 로직 수행
+            if category_pk:
+                try:
+                    category = Category.objects.get(pk=category_pk)
+                except Exception:
+                    raise ParseError("The Category kind should be rooms")
+            try:
+                with transaction.atomic():
+                    # User는 변경하지 않음
+                    if category_pk:
+                        room = serializer.save(
+                            category=category,
+                        )
+                    # amenities 입력값 존재 시 수정
+                    amenities = request.data.get("amenities")
+                    if amenities:
+                        # 기존의 amenities 제거
+                        room.amenities.clear()
+                        for amenity_pk in amenities:
+                            amenity = Amenity.objects.get(pk=amenity_pk)
+                            room.amenities.add(amenity)
+                    serializer = RoomDetailSerializer(
+                        room,
+                    )
+                    return Response(serializer.data)
+            except Exception:
+                raise ParseError("Amenity Not found")
+        else:
+            return Response(serializer.errors)
+
+    def delete(self, request, pk):
+        room = self.get_object(pk)
+        # room의 주인이 아니라면 방을 삭제할 수 없도록 코딩
+        # 로그인되어있는지 확인
+        # 두 로직 모두 동작하도록 설계
+        if not request.user.is_authenticated:
+            raise NotAuthenticated
+        if room.owner != request.user:
+            raise PermissionDenied
+        room.delete()
+        return Response(status=status.HTTP_200_OK)

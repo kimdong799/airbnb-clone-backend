@@ -1,14 +1,10 @@
 {
-    "amenities": [1, 2, 3],
+    "amenities": [1,2],
     "category": 1,
-    "name": "TEST ROOM FROM DRF",
+    "name": "PUT TEST",
     "country": "한국",
     "city": "서울",
     "price": 20,
     "rooms": 3,
-    "toilets": 2,
-    "description": "Beauti Place",
-    "address": "Seoul, Korea.",
-    "pet_friendly": true,
-    "kind": "private_room"
+    "toilets": 2
 }
