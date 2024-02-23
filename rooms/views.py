@@ -1,5 +1,4 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, NotAuthenticated, ParseError
@@ -100,23 +99,22 @@ class RoomDetail(APIView):
 
                 # owner는 request를 보낸 user로 지정
                 # create 메소드의 validated_data에 추가
-                room = serializer.save(
-                    owner=request.user,
-                    category=category,
-                )
-
-                # ManyToMany Field를 room object에 전달
-                amenities = request.data.get("amenities")
-                for amenity_pk in amenities:
-                    try:
-                        amenity = Amenity.objects.get(pk=amenity_pk)
-                    except Amenity.DoesNotExist:
-                        room.delete()
-                        raise ParseError(f"Amenity with id {amenity_pk} not found.")
-                room.amenities.add(amenity)
-
-                serializer = RoomDetailSerializer(room)
-                return Response(serializer.data)
+                # transaction.atomic()을 이용하여 Query 실패 시 DB 롤백
+                try:
+                    with transaction.atomic():
+                        room = serializer.save(
+                            owner=request.user,
+                            category=category,
+                        )
+                        # ManyToMany Field를 room object에 전달
+                        amenities = request.data.get("amenities")
+                        for amenity_pk in amenities:
+                            amenity = Amenity.objects.get(pk=amenity_pk)
+                        room.amenities.add(amenity)
+                        serializer = RoomDetailSerializer(room)
+                        return Response(serializer.data)
+                except Exception:
+                    return ParseError("Amenity not found")
             else:
                 return Response(serializer.errors)
         else:
