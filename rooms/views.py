@@ -90,13 +90,13 @@ class RoomDetail(APIView):
                 # user request의 category 전달
                 category_pk = request.data.get("category")
                 if not category_pk:
-                    raise ParseError
+                    raise ParseError("Category is required.")
                 try:
                     category = Category.objects.get(pk=category_pk)
                     if category.kind == Category.CategoryKindChoices.EXPERIENCES:
-                        raise ParseError
+                        raise ParseError("The Category kind should be rooms")
                 except Category.DoesNotExist:
-                    raise ParseError
+                    raise ParseError("Category not found")
 
                 # owner는 request를 보낸 user로 지정
                 # create 메소드의 validated_data에 추가
@@ -104,6 +104,17 @@ class RoomDetail(APIView):
                     owner=request.user,
                     category=category,
                 )
+
+                # ManyToMany Field를 room object에 전달
+                amenities = request.data.get("amenities")
+                for amenity_pk in amenities:
+                    try:
+                        amenity = Amenity.objects.get(pk=amenity_pk)
+                    except Amenity.DoesNotExist:
+                        room.delete()
+                        raise ParseError(f"Amenity with id {amenity_pk} not found.")
+                room.amenities.add(amenity)
+
                 serializer = RoomDetailSerializer(room)
                 return Response(serializer.data)
             else:
