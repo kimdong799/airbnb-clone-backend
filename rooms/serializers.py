@@ -26,13 +26,20 @@ class RoomDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer(
         read_only=True,
     )
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Room
         fields = "__all__"
 
+    # SerializerMethodField 정의 시 get_ 로 시작하는 method 정의
+    def get_rating(self, room):
+        return room.rating()
+
 
 class RoomListSerializer(serializers.ModelSerializer):
+    rating = serializers.SerializerMethodField()
+
     class Meta:
         model = Room
         fields = (
@@ -41,4 +48,8 @@ class RoomListSerializer(serializers.ModelSerializer):
             "country",
             "city",
             "price",
+            "rating",
         )
+
+    def get_rating(self, room):
+        return room.rating()
