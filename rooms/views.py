@@ -11,6 +11,7 @@ from rest_framework import status
 from .models import Room, Amenity
 from categories.models import Category
 from .serializers import RoomDetailSerializer, RoomListSerializer, AmenitySerializer
+from reviews.serializers import ReviewSerializer
 
 # Create your views here.
 # view : 유저가 특정 url에 접근했을 때 작동하는 함수
@@ -187,3 +188,31 @@ class RoomDetail(APIView):
             raise PermissionDenied
         room.delete()
         return Response(status=status.HTTP_200_OK)
+
+
+class RoomReviews(APIView):
+    def get_object(self, pk):
+        try:
+            room = Room.objects.get(pk=pk)
+        except Room.DoesNotExist:
+            raise NotFound
+        return room
+
+    def get(self, request, pk):
+        # 페지네이션을 위한 query_params 사용
+        # page값이 존재하지 않는 경우 1로 지정
+        try:
+            page = request.query_params.get("page", 1)
+            page = int(page)
+        except ValueError:
+            # 잘못된 page url요청 시 1로 지정
+            page = 1
+        page_size = 3
+        start = (page - 1) * page_size
+        end = start + page_size
+        room = self.get_object(pk)
+        serializer = ReviewSerializer(
+            room.reviews.all()[start:end],
+            many=True,
+        )
+        return Response(serializer.data)
