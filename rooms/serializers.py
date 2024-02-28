@@ -1,56 +1,29 @@
-from rest_framework import serializers
-from .models import Room, Amenity
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from users.serializers import TinyUserSerializer
-from reviews.serializers import ReviewSerializer
 from categories.serializers import CategorySerializer
+from wishlists.models import Wishlist
+from .models import Amenity, Room
+from medias.serializers import PhotoSerializer
 
 
-# ModelSerializer를 사용하면 id, created_at, updated_at 필드는 자동으로 read_only로 지정됨
-class AmenitySerializer(serializers.ModelSerializer):
+class AmenitySerializer(ModelSerializer):
     class Meta:
         model = Amenity
         fields = (
+            "pk",
             "name",
             "description",
         )
 
 
-class RoomDetailSerializer(serializers.ModelSerializer):
-    # Serializer 관계 지정 필트 커스터마이징
-    owner = TinyUserSerializer(
-        read_only=True,
-    )
-    amenities = AmenitySerializer(
-        read_only=True,
-        many=True,
-    )
-    category = CategorySerializer(
-        read_only=True,
-    )
-    rating = serializers.SerializerMethodField()
-    is_owner = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Room
-        fields = "__all__"
-
-    # SerializerMethodField 정의 시 get_ 로 시작하는 method 정의
-    def get_rating(self, room):
-        return room.rating()
-
-    def get_is_owner(self, room):
-        request = self.context["request"]
-        return room.owner == request.user
-
-
-class RoomListSerializer(serializers.ModelSerializer):
-    rating = serializers.SerializerMethodField()
-    is_owner = serializers.SerializerMethodField()
+class RoomListSerializer(ModelSerializer):
+    rating = SerializerMethodField()
+    is_owner = SerializerMethodField()
 
     class Meta:
         model = Room
         fields = (
-            "pk",
+            "id",
             "name",
             "country",
             "city",
@@ -63,5 +36,29 @@ class RoomListSerializer(serializers.ModelSerializer):
         return room.rating()
 
     def get_is_owner(self, room):
-        request = self.context["request"]
-        return room.owner == request.user
+        request = self.context.get("request")
+        if request:
+            return room.owner == request.user
+        return False
+
+
+class RoomDetailSerializer(ModelSerializer):
+    owner = TinyUserSerializer(read_only=True)
+    category = CategorySerializer(
+        read_only=True,
+    )
+    rating = SerializerMethodField()
+    is_owner = SerializerMethodField()
+
+    class Meta:
+        model = Room
+        exclude = ("amenities",)
+
+    def get_rating(self, room):
+        return room.rating()
+
+    def get_is_owner(self, room):
+        request = self.context.get("request")
+        if request:
+            return room.owner == request.user
+        return False

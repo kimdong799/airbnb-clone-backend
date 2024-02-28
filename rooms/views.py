@@ -14,6 +14,7 @@ from .serializers import RoomDetailSerializer, RoomListSerializer, AmenitySerial
 from reviews.serializers import ReviewSerializer
 from django.conf import settings
 from medias.serializers import PhotoSerializer
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 
 class Amenities(APIView):
@@ -65,6 +66,8 @@ class AmenityDetail(APIView):
 
 # Serializer Relationship
 class Rooms(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get(self, request):
         all_rooms = Room.objects.all()
         serialzer = RoomListSerializer(
@@ -73,6 +76,47 @@ class Rooms(APIView):
             context={"request": request},
         )
         return Response(serialzer.data)
+
+    def post(self, request):
+        # user 인증
+        if request.user.is_authenticated:
+            serializer = RoomDetailSerializer(data=request.data)
+            if serializer.is_valid():
+                # user request의 category 전달
+                category_pk = request.data.get("category")
+                if not category_pk:
+                    raise ParseError("Category is required.")
+                try:
+                    category = Category.objects.get(pk=category_pk)
+                    if category.kind == Category.CategoryKindChoices.EXPERIENCES:
+                        raise ParseError("The Category kind should be rooms")
+                except Category.DoesNotExist:
+                    raise ParseError("Category not found")
+
+                # owner는 request를 보낸 user로 지정
+                # create 메소드의 validated_data에 추가
+                # transaction.atomic()을 이용하여 Query 실패 시 DB 롤백
+                try:
+                    with transaction.atomic():
+                        room = serializer.save(
+                            owner=request.user,
+                            category=category,
+                        )
+                        # ManyToMany Field를 room object에 전달
+                        amenities = request.data.get("amenities")
+
+                        for amenity_pk in amenities:
+                            amenity = Amenity.objects.get(pk=amenity_pk)
+                            room.amenities.add(amenity)
+                        print(room.amenities.all())
+                        serializer = RoomDetailSerializer(room)
+                        return Response(serializer.data)
+                except Exception:
+                    raise ParseError("Amenity not found")
+            else:
+                return Response(serializer.errors)
+        else:
+            raise NotAuthenticated
 
 
 class RoomDetail(APIView):
@@ -118,9 +162,11 @@ class RoomDetail(APIView):
                         )
                         # ManyToMany Field를 room object에 전달
                         amenities = request.data.get("amenities")
+
                         for amenity_pk in amenities:
                             amenity = Amenity.objects.get(pk=amenity_pk)
-                        room.amenities.add(amenity)
+                            room.amenities.add(amenity)
+                        print(room.amenities.all())
                         serializer = RoomDetailSerializer(room)
                         return Response(serializer.data)
                 except Exception:
