@@ -10,7 +10,6 @@ class AmenitySerializer(ModelSerializer):
     class Meta:
         model = Amenity
         fields = (
-            "pk",
             "name",
             "description",
         )
@@ -19,6 +18,10 @@ class AmenitySerializer(ModelSerializer):
 class RoomListSerializer(ModelSerializer):
     rating = SerializerMethodField()
     is_owner = SerializerMethodField()
+    amenities = AmenitySerializer(
+        many=True,
+        read_only=True,
+    )
 
     class Meta:
         model = Room
@@ -30,6 +33,7 @@ class RoomListSerializer(ModelSerializer):
             "price",
             "rating",
             "is_owner",
+            "amenities",
         )
 
     def get_rating(self, room):

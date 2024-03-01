@@ -66,6 +66,8 @@ class AmenityDetail(APIView):
 
 # Serializer Relationship
 class Rooms(APIView):
+    # GET Method는 누구나 통과
+    # PUT, POST Method는 인증받은 User만 통과
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
@@ -78,48 +80,46 @@ class Rooms(APIView):
         return Response(serialzer.data)
 
     def post(self, request):
-        # user 인증
-        if request.user.is_authenticated:
-            serializer = RoomDetailSerializer(data=request.data)
-            if serializer.is_valid():
-                # user request의 category 전달
-                category_pk = request.data.get("category")
-                if not category_pk:
-                    raise ParseError("Category is required.")
-                try:
-                    category = Category.objects.get(pk=category_pk)
-                    if category.kind == Category.CategoryKindChoices.EXPERIENCES:
-                        raise ParseError("The Category kind should be rooms")
-                except Category.DoesNotExist:
-                    raise ParseError("Category not found")
+        serializer = RoomDetailSerializer(data=request.data)
+        if serializer.is_valid():
+            # user request의 category 전달
+            category_pk = request.data.get("category")
+            if not category_pk:
+                raise ParseError("Category is required.")
+            try:
+                category = Category.objects.get(pk=category_pk)
+                if category.kind == Category.CategoryKindChoices.EXPERIENCES:
+                    raise ParseError("The Category kind should be rooms")
+            except Category.DoesNotExist:
+                raise ParseError("Category not found")
 
-                # owner는 request를 보낸 user로 지정
-                # create 메소드의 validated_data에 추가
-                # transaction.atomic()을 이용하여 Query 실패 시 DB 롤백
-                try:
-                    with transaction.atomic():
-                        room = serializer.save(
-                            owner=request.user,
-                            category=category,
-                        )
-                        # ManyToMany Field를 room object에 전달
-                        amenities = request.data.get("amenities")
+            # owner는 request를 보낸 user로 지정
+            # create 메소드의 validated_data에 추가
+            # transaction.atomic()을 이용하여 Query 실패 시 DB 롤백
+            try:
+                with transaction.atomic():
+                    room = serializer.save(
+                        owner=request.user,
+                        category=category,
+                    )
+                    # ManyToMany Field를 room object에 전달
+                    amenities = request.data.get("amenities")
 
-                        for amenity_pk in amenities:
-                            amenity = Amenity.objects.get(pk=amenity_pk)
-                            room.amenities.add(amenity)
-                        print(room.amenities.all())
-                        serializer = RoomDetailSerializer(room)
-                        return Response(serializer.data)
-                except Exception:
-                    raise ParseError("Amenity not found")
-            else:
-                return Response(serializer.errors)
+                    for amenity_pk in amenities:
+                        amenity = Amenity.objects.get(pk=amenity_pk)
+                        room.amenities.add(amenity)
+                    print(room.amenities.all())
+                    serializer = RoomDetailSerializer(room)
+                    return Response(serializer.data)
+            except Exception:
+                raise ParseError("Amenity not found")
         else:
-            raise NotAuthenticated
+            return Response(serializer.errors)
 
 
 class RoomDetail(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get_object(self, pk):
         try:
             room = Room.objects.get(pk=pk)
@@ -181,8 +181,6 @@ class RoomDetail(APIView):
         # room의 주인이 아니라면 방을 수정할 수 없도록 코딩
         # 로그인되어있는지 확인
         # 두 로직 모두 동작하도록 설계
-        if not request.user.is_authenticated:
-            raise NotAuthenticated
         if room.owner != request.user:
             raise PermissionDenied
         serializer = RoomDetailSerializer(
@@ -227,8 +225,6 @@ class RoomDetail(APIView):
         # room의 주인이 아니라면 방을 삭제할 수 없도록 코딩
         # 로그인되어있는지 확인
         # 두 로직 모두 동작하도록 설계
-        if not request.user.is_authenticated:
-            raise NotAuthenticated
         if room.owner != request.user:
             raise PermissionDenied
         room.delete()
@@ -289,6 +285,8 @@ class RoomAmenities(APIView):
 
 
 class RoomPhotos(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get_object(self, pk):
         try:
             return Room.objects.get(pk=pk)
@@ -298,8 +296,7 @@ class RoomPhotos(APIView):
     def post(self, request, pk):
         # 사용자 인증
         room = self.get_object(pk=pk)
-        if not request.user.is_authenticated:
-            raise NotAuthenticated
+
         if request.user != room.owner:
             raise PermissionDenied
         serializer = PhotoSerializer(data=request.data)
