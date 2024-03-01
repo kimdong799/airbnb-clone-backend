@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from .models import Room, Amenity
 
 urlpatterns = [
     path("", views.Rooms.as_view()),

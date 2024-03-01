@@ -22,6 +22,10 @@ class RoomListSerializer(ModelSerializer):
         many=True,
         read_only=True,
     )
+    photos = PhotoSerializer(
+        many=True,
+        read_only=True,
+    )
 
     class Meta:
         model = Room
@@ -34,6 +38,7 @@ class RoomListSerializer(ModelSerializer):
             "rating",
             "is_owner",
             "amenities",
+            "photos",
         )
 
     def get_rating(self, room):
@@ -53,10 +58,18 @@ class RoomDetailSerializer(ModelSerializer):
     )
     rating = SerializerMethodField()
     is_owner = SerializerMethodField()
+    amenities = AmenitySerializer(
+        many=True,
+        read_only=True,
+    )
+    photos = PhotoSerializer(
+        many=True,
+        read_only=True,
+    )
 
     class Meta:
         model = Room
-        exclude = ("amenities",)
+        fields = "__all__"
 
     def get_rating(self, room):
         return room.rating()
