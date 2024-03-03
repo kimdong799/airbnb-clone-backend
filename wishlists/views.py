@@ -111,8 +111,7 @@ class WishlistToggle(APIView):
             pk,
             request.user,
         )
-        room = self.get_room(pk)
-
+        room = self.get_room(room_pk)
         if wishlists.rooms.filter(pk=room.pk).exists():
             wishlists.rooms.remove(room)
         else:
