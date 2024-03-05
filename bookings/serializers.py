@@ -38,7 +38,7 @@ class CreateRoomBookingSerializer(serializers.ModelSerializer):
                 "Check in shoud be smmaller than Check out."
             )
         if Booking.objects.filter(
-            check_in__ltr=data["check_out"],
+            check_in__lte=data["check_out"],
             check_out__gte=data["check_in"],
         ).exists():
             raise serializers.ValidationError(
