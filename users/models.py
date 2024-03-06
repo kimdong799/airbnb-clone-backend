@@ -34,8 +34,7 @@ class User(AbstractUser):
         max_length=150,
         editable=False,
     )
-    avatar = models.ImageField(
-        upload_to="avatars/",
+    avatar = models.URLField(
         blank=True,
     )
     name = models.CharField(
