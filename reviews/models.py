@@ -8,6 +8,7 @@ class Review(CommonModel):
     user = models.ForeignKey(
         "users.User",
         on_delete=models.CASCADE,
+        related_name="reviews",
     )
     # room에 대한 riview로 experience의 rivew일 수 있기에 null, blank를 True로 둠
     room = models.ForeignKey(

@@ -15,3 +15,19 @@ class ReviewSerializer(serializers.ModelSerializer):
             "payload",
             "rating",
         )
+
+
+class PublicReviewSerializer(serializers.ModelSerializer):
+    user = TinyUserSerializer(
+        read_only=True,
+    )
+
+    class Meta:
+        model = Review
+        fields = (
+            "user",
+            "room",
+            "experience",
+            "payload",
+            "rating",
+        )
