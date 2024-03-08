@@ -41,7 +41,9 @@ class User(AbstractUser):
         max_length=150,
         default="",
     )
-    is_host = models.BooleanField()
+    is_host = models.BooleanField(
+        default=False,
+    )
     gender = models.CharField(
         max_length=10,
         choices=GenderChoices.choices,
