@@ -1,3 +1,5 @@
+import jwt
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -135,6 +137,25 @@ class Login(APIView):
             # 사용자에게 cookie 전달
             login(request, user)
             return Response({"ok":"welcome!"})
+        else:
+            return Response({"error": "wrong password"})
+
+class JWTLogin(APIView):
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        if not username or not password:
+            raise ParseError
+        user = authenticate(
+            request,
+            username=username,
+            password=password,
+        )
+        if user:
+            # 토큰의 값은 중요한 user정보를 저장하지 않는다
+            # 서명은 암호화하여 전달한다
+            token = jwt.encode({"pk":user.pk}, settings.SECRET_KEY, algorithm="HS256",)
+            return Response({"token":token})
         else:
             return Response({"error": "wrong password"})
 
