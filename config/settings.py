@@ -142,6 +142,13 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Auth
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",  # django 기본 인증 방식
+        "config.authentications.TrustMeBroAuthentication",
+    ]
+}
+
 # django user 모델 커스텀 시 명시
 AUTH_USER_MODEL = "users.User"
 MEDIA_ROOT = "uploads"
