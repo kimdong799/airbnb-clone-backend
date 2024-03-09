@@ -4,6 +4,8 @@ from . import views
 urlpatterns = [
     path("", views.Users.as_view()),
     path("me", views.Me.as_view()),
+    path("log-in", views.Login.as_view()),
+    path("log-out", views.Logout.as_view()),
     # me 라는 이름의 user 검색을 방지
     path("@<str:username>", views.PublicUser.as_view()),
     path("@<str:username>/rooms", views.UserRooms.as_view()),
