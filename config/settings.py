@@ -148,6 +148,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",  # django 기본 인증 방식
         "rest_framework.authentication.TokenAuthentication",
         "config.authentications.TrustMeBroAuthentication",
+        "config.authentications.JWTAuthentication",
     ]
 }
 
