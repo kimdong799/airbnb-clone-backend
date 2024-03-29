@@ -18,8 +18,8 @@ class AmenitySerializer(ModelSerializer):
 
 class RoomListSerializer(ModelSerializer):
     rating = SerializerMethodField()
-    is_owner = SerializerMethodField()
-    is_liked = SerializerMethodField()
+    # is_owner = SerializerMethodField()
+    # is_liked = SerializerMethodField()
     amenities = AmenitySerializer(
         many=True,
         read_only=True,
@@ -38,10 +38,10 @@ class RoomListSerializer(ModelSerializer):
             "city",
             "price",
             "rating",
-            "is_owner",
+            # "is_owner",
             "amenities",
             "photos",
-            "is_liked",
+            # "is_liked",
         )
 
     def get_rating(self, room):
