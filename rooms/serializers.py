@@ -18,8 +18,8 @@ class AmenitySerializer(ModelSerializer):
 
 class RoomListSerializer(ModelSerializer):
     rating = SerializerMethodField()
-    # is_owner = SerializerMethodField()
-    # is_liked = SerializerMethodField()
+    is_owner = SerializerMethodField()
+    is_liked = SerializerMethodField()
     amenities = AmenitySerializer(
         many=True,
         read_only=True,
@@ -38,10 +38,10 @@ class RoomListSerializer(ModelSerializer):
             "city",
             "price",
             "rating",
-            # "is_owner",
+            "is_owner",
             "amenities",
             "photos",
-            # "is_liked",
+            "is_liked",
         )
 
     def get_rating(self, room):
@@ -49,16 +49,19 @@ class RoomListSerializer(ModelSerializer):
 
     def get_is_owner(self, room):
         request = self.context.get("request")
-        if request:
+        if request.user.is_authenticated:
             return room.owner == request.user
         return False
 
     def get_is_liked(self, room):
         request = self.context.get("request")
-        return Wishlist.objects.filter(
-            user=request.user,
-            rooms__id=room.pk,
-        ).exists()
+        if request.user.is_authenticated:
+            return Wishlist.objects.filter(
+                user=request.user,
+                rooms__id=room.pk,
+            ).exists()
+        else:
+            return False
 
 
 class RoomDetailSerializer(ModelSerializer):
@@ -87,13 +90,14 @@ class RoomDetailSerializer(ModelSerializer):
 
     def get_is_owner(self, room):
         request = self.context.get("request")
-        if request:
+        if request.user.is_authenticated:
             return room.owner == request.user
         return False
 
     def get_is_liked(self, room):
         request = self.context.get("request")
-        return Wishlist.objects.filter(
-            user=request.user,
-            rooms__id=room.pk,
-        ).exists()
+        if request.user.is_authenticated:
+            return Wishlist.objects.filter(
+                user=request.user,
+                rooms__id=room.pk,
+            ).exists()

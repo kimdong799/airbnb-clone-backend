@@ -24,7 +24,7 @@ class Photo(CommonModel):
     )
 
     def __str__(self):
-        return "Photo File"
+        return f"{self.room.name}-{self.updated_at}"
 
 
 class Video(CommonModel):
