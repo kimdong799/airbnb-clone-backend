@@ -136,9 +136,10 @@ class Login(APIView):
             # user정보가 담긴 session 생성
             # 사용자에게 cookie 전달
             login(request, user)
-            return Response({"ok":"welcome!"})
+            return Response({"ok": "welcome!"})
         else:
             return Response({"error": "wrong password"})
+
 
 class JWTLogin(APIView):
     def post(self, request):
@@ -154,13 +155,19 @@ class JWTLogin(APIView):
         if user:
             # 토큰의 값은 중요한 user정보를 저장하지 않는다
             # 서명은 암호화하여 전달한다
-            token = jwt.encode({"pk":user.pk}, settings.SECRET_KEY, algorithm="HS256",)
-            return Response({"token":token})
+            token = jwt.encode(
+                {"pk": user.pk},
+                settings.SECRET_KEY,
+                algorithm="HS256",
+            )
+            return Response({"token": token})
         else:
             return Response({"error": "wrong password"})
 
+
 class Logout(APIView):
     permission_classes = [IsAuthenticated]
+
     def post(self, request):
         logout(request)
-        return Response({"ok":"Bye!"})
+        return Response({"ok": "Bye!"})

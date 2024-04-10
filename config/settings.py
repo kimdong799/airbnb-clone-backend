@@ -151,13 +151,15 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",  # django 기본 인증 방식
         "rest_framework.authentication.TokenAuthentication",
-        # "config.authentications.TrustMeBroAuthentication",
+        "config.authentications.TrustMeBroAuthentication",
         "config.authentications.JWTAuthentication",
     ]
 }
 
 # 프론트 서버 CORS 허용 설정
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:3000"]
+
+CORS_ALLOW_CREDENTIALS = True
 
 # django user 모델 커스텀 시 명시
 AUTH_USER_MODEL = "users.User"
