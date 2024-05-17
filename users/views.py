@@ -178,19 +178,49 @@ class Logout(APIView):
 class GithubLogin(APIView):
 
     def post(self, request):
-        code = request.data.get("code")
-        client_id = "Ov23lizjBzgSJPSlxXl5"
-        access_token = requests.post(
-            f"https://github.com/login/oauth/access_token?code={code}&client_id={client_id}&client_secret={settings.GH_SECRET}",
-            headers={"Accept": "application/json"},
-        )
-        access_token = access_token.json().get("access_token")
-        user_data = requests.get(
-            "https://api.github.com/user",
-            headers={
-                "Authorization": f"Bearer {access_token}",
-                "Accept": "application/json",
-            },
-        )
-        user_data = user_data.json()
-        return Response()
+        try:
+            code = request.data.get("code")
+            client_id = "Ov23lizjBzgSJPSlxXl5"
+            access_token = requests.post(
+                f"https://github.com/login/oauth/access_token?code={code}&client_id={client_id}&client_secret={settings.GH_SECRET}",
+                headers={"Accept": "application/json"},
+            )
+            access_token = access_token.json().get("access_token")
+
+            user_data = requests.get(
+                "https://api.github.com/user",
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Accept": "application/json",
+                },
+            )
+            user_data = user_data.json()
+
+            user_emails = requests.get(
+                "https://api.github.com/user/emails",
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Accept": "application/json",
+                },
+            )
+            user_emails = user_emails.json()
+            # github email로 user를 찾을 수 있는 경우 로그인
+            try:
+                user = User.objects.get(email=user_emails[0]["email"])
+                login(request, user)
+                return Response(status=status.HTTP_200_OK)
+            # github email로 user를 찾을 수 없는 경우 회원가입
+            except User.DoesNotExist:
+                uesr = User.objects.create(
+                    username=user_data.get("login"),
+                    email=user_emails[0]["email"],
+                    name=user_data.get("name"),
+                    avatar=user_data.get("avatar_url"),
+                )
+                # unusable_password가 설정된 User는 소셜 login만 지원
+                user.set_unusable_password()
+                user.save()
+                login(request, user)
+                return Response(status=status.HTTP_200_OK)
+        except Exception:
+            return Response(status.HTTP_400_BAD_REQUEST)
