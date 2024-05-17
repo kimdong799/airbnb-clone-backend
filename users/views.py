@@ -171,3 +171,11 @@ class Logout(APIView):
     def post(self, request):
         logout(request)
         return Response({"ok": "Bye!"})
+
+
+class GithubLogin(APIView):
+
+    def post(self, request):
+        code = request.data.get("code")
+        print(code)
+        return Response()

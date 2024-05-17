@@ -8,6 +8,7 @@ urlpatterns = [
     path("log-in", views.Login.as_view()),  # Cookie Login
     path("token-login", obtain_auth_token),  # Token Login
     path("jwt-login", views.JWTLogin.as_view()),  # JWT Login
+    path("github", views.GithubLogin.as_view()),  # GitHub Login
     path("log-out", views.Logout.as_view()),
     # me 라는 이름의 user 검색을 방지
     path("@<str:username>", views.PublicUser.as_view()),
