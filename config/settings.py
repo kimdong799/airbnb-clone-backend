@@ -164,6 +164,8 @@ CORS_ALLOW_CREDENTIALS = True
 # Post Request 허용 domain
 CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:3000"]
 
+GH_SECRET = env("GH_SECRET")
+
 # django user 모델 커스텀 시 명시
 AUTH_USER_MODEL = "users.User"
 MEDIA_ROOT = "uploads"
